@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import { GenderEnum, IUser, OtpTypesEnum, ProviderEnum, RoleEnum } from "../../Common";
+import { encrypt, generateHash } from "../../Utils";
 
 
 const userSchema = new mongoose.Schema<IUser>({
@@ -60,6 +61,22 @@ const userSchema = new mongoose.Schema<IUser>({
     }
 
 })
+
+userSchema.pre('save', function(){
+    if(this.isModified('password')){
+        
+        // hsh password
+        this.password = generateHash(this.password as string)
+
+    }
+
+    if(this.isModified('phoneNumber')){
+        // Encrypt phone number
+        this.phoneNumber = encrypt(this.phoneNumber as string)
+    }
+
+})
+
 
 const UserModel = mongoose.model('User' , userSchema)
 export {UserModel}

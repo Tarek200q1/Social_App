@@ -34,6 +34,22 @@ class ProfileService {
         const deletedResponse = await this.s3Client.DeleteFileFromS3(deletedDocument?.profilePicture);
         res.json((0, Utils_1.SuccessResponse)('Account deleted successfully', 200, deletedResponse));
     };
+    updateProfile = async (req, res) => {
+        const { firstName, lastName, email, password, gender, phoneNumber, DOB } = req.body;
+        await this.userRepo.updateOneDocument({ _id: req.loggedInUser.user._id }, { $set: { firstName, lastName, email, password, gender, phoneNumber, DOB } }, { new: true });
+        res.json((0, Utils_1.SuccessResponse)('Profile updated successfully', 200));
+    };
+    getProfileData = async (req, res) => {
+        const { user: { _id } } = req.loggedInUser;
+        const user = await this.userRepo.findDocumentById(_id);
+        if (!user)
+            throw new Utils_1.BadRequestException('User not found');
+        res.json((0, Utils_1.SuccessResponse)('Profile data fetched successfully', 200, user));
+    };
+    listUsers = async (req, res) => {
+        const users = await this.userRepo.findDocuments();
+        res.json((0, Utils_1.SuccessResponse)('Users fetched successfully', 200, users));
+    };
 }
 exports.ProfileService = ProfileService;
 exports.default = new ProfileService();

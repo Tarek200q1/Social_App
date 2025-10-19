@@ -6,6 +6,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.UserModel = void 0;
 const mongoose_1 = __importDefault(require("mongoose"));
 const Common_1 = require("../../Common");
+const Utils_1 = require("../../Utils");
 const userSchema = new mongoose_1.default.Schema({
     firstName: {
         type: String,
@@ -61,6 +62,16 @@ const userSchema = new mongoose_1.default.Schema({
     devices: {
         type: [String],
         default: []
+    }
+});
+userSchema.pre('save', function () {
+    if (this.isModified('password')) {
+        // hsh password
+        this.password = (0, Utils_1.generateHash)(this.password);
+    }
+    if (this.isModified('phoneNumber')) {
+        // Encrypt phone number
+        this.phoneNumber = (0, Utils_1.encrypt)(this.phoneNumber);
     }
 });
 const UserModel = mongoose_1.default.model('User', userSchema);
