@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { BadRequestException, S3ClientService, SuccessResponse } from "../../../Utils";
-import { IRequest } from "../../../Common";
+import { IRequest, IUser } from "../../../Common";
 import { UserRepository } from "../../../DB/Repositories";
 import { UserModel } from "../../../DB/Models";
 import mongoose from "mongoose";
@@ -44,6 +44,30 @@ export class ProfileService {
         const deletedResponse = await this.s3Client.DeleteFileFromS3(deletedDocument?.profilePicture as string)
 
         res.json(SuccessResponse<unknown>('Account deleted successfully', 200, deletedResponse))
+    }
+
+    updateProfile = async(req: Request, res: Response) => {
+        const {firstName, lastName, email, password, gender, phoneNumber, DOB}: IUser = req.body
+
+        await this.userRepo.updateOneDocument(
+            { _id: (req as IRequest).loggedInUser.user._id as mongoose.Schema.Types.ObjectId },
+            { $set:{firstName, lastName, email, password, gender, phoneNumber, DOB}},
+            {new:true}
+        )
+
+        res.json(SuccessResponse<IUser>('Profile updated successfully', 200))
+    }
+
+    getProfileData = async(req: Request, res: Response) => {
+        const {user: { _id }} = (req as IRequest).loggedInUser
+        const user = await this.userRepo.findDocumentById(_id as mongoose.Schema.Types.ObjectId)
+        if (!user) throw new BadRequestException('User not found')
+        res.json(SuccessResponse<IUser>('Profile data fetched successfully', 200, user))
+    }
+
+    listUsers = async(req: Request, res: Response) => {
+        const users = await this.userRepo.findDocuments()
+        res.json(SuccessResponse<IUser[]>('Users fetched successfully', 200, users))
     }
 }
 

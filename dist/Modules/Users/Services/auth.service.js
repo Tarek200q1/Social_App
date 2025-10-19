@@ -16,67 +16,63 @@ class AuthService {
         const isEmailExists = await this.userRepo.findOneDocument({ email }, 'email');
         if (isEmailExists)
             throw next(new excptions_utils_1.ConflictException('Email already exists', { invalidEmail: email }));
-        // Encrypt phone number
-        const encryptedNumber = (0, Utils_1.encrypt)(phoneNumber);
-        // hash password
-        const hashedPassword = (0, Utils_1.generateHash)(password);
         // Send OTP
         const otp = Math.floor(Math.random() * 100000).toString();
         Utils_1.localEmitter.emit('sendEmail', {
             to: email,
             subject: `OTP for signuUp`,
             content: `
-    <div style="
-      font-family: 'Segoe UI', Arial, sans-serif;
-      background-color: #f4f6f8;
-      padding: 30px;
-      text-align: center;
-    ">
-      <div style="
-        background-color: #ffffff;
-        border-radius: 12px;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-        padding: 40px;
-        display: inline-block;
-        max-width: 500px;
-      ">
-        <h1 style="color: #2c3e50; margin-bottom: 10px;">👋 Welcome, ${firstName}!</h1>
-        <p style="color: #555; font-size: 15px; margin-top: 0;">
-          We're thrilled to have you join us.  
-          To complete your registration, please use the OTP below to verify your email address.
-        </p>
+                      <div style="
+                        font-family: 'Segoe UI', Arial, sans-serif;
+                        background-color: #f4f6f8;
+                        padding: 30px;
+                        text-align: center;
+                      ">
+                        <div style="
+                          background-color: #ffffff;
+                          border-radius: 12px;
+                          box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+                          padding: 40px;
+                          display: inline-block;
+                          max-width: 500px;
+                        ">
+                          <h1 style="color: #2c3e50; margin-bottom: 10px;">👋 Welcome, ${firstName}!</h1>
+                          <p style="color: #555; font-size: 15px; margin-top: 0;">
+                            We're thrilled to have you join us.  
+                            To complete your registration, please use the OTP below to verify your email address.
+                          </p>
 
-        <div style="
-          margin: 25px 0;
-          display: inline-block;
-          background: linear-gradient(135deg, #007bff, #00b4d8);
-          color: white;
-          padding: 14px 35px;
-          border-radius: 10px;
-          font-size: 22px;
-          letter-spacing: 3px;
-          font-weight: bold;
-        ">
-          ${otp}
-        </div>
+                          <div style="
+                            margin: 25px 0;
+                            display: inline-block;
+                            background: linear-gradient(135deg, #007bff, #00b4d8);
+                            color: white;
+                            padding: 14px 35px;
+                            border-radius: 10px;
+                            font-size: 22px;
+                            letter-spacing: 3px;
+                            font-weight: bold;
+                          ">
+                            ${otp}
+                          </div>
 
-        <p style="color: #777; font-size: 13px;">
-          This code will expire in <b>10 minutes</b>.  
-          If you didn’t sign up for an account, you can safely ignore this email.
-        </p>
+                          <p style="color: #777; font-size: 13px;">
+                            This code will expire in <b>10 minutes</b>.  
+                            If you didn’t sign up for an account, you can safely ignore this email.
+                          </p>
 
-        <hr style="border: none; height: 1px; background-color: #eee; margin: 25px 0;">
+                          <hr style="border: none; height: 1px; background-color: #eee; margin: 25px 0;">
 
-        <p style="color: #999; font-size: 12px; margin-top: 10px;">
-          Need help? <a href="#" style="color: #007bff; text-decoration: none;">Contact Support</a>
-        </p>
-      </div>
+                          <p style="color: #999; font-size: 12px; margin-top: 10px;">
+                            Need help? <a href="#" style="color: #007bff; text-decoration: none;">Contact Support</a>
+                          </p>
+                        </div>
 
-      <p style="color: #aaa; font-size: 11px; margin-top: 25px;">
-        &copy; ${new Date().getFullYear()} Your Company Name. All rights reserved.
-      </p>
-    </div>
-  `
+                        <p style="color: #aaa; font-size: 11px; margin-top: 25px;">
+                          &copy; ${new Date().getFullYear()} Your Company Name. All rights reserved.
+                        </p>
+                      </div>
+                     `
         });
         const confirmationOtp = {
             value: (0, Utils_1.generateHash)(otp),
@@ -84,7 +80,7 @@ class AuthService {
             otpType: Common_1.OtpTypesEnum.CONFIRMATION
         };
         const newUser = await this.userRepo.createNewDocument({
-            firstName, lastName, email, password: hashedPassword, gender, DOB, phoneNumber: encryptedNumber, OTPS: [confirmationOtp]
+            firstName, lastName, email, password, gender, DOB, phoneNumber, OTPS: [confirmationOtp]
         });
         return res.status(201).json((0, Utils_1.SuccessResponse)('User created successfully', 201, newUser));
     };

@@ -9,6 +9,9 @@ class BaseRepository {
     async createNewDocument(document) {
         return await this.model.create(document);
     }
+    async findDocuments(filter = {}, projection, options) {
+        return await this.model.find(filter, projection, options);
+    }
     async findOneDocument(filter, projection, options) {
         return await this.model.findOne(filter, projection, options);
     }
@@ -18,7 +21,9 @@ class BaseRepository {
     async deleteByIdDocument(id) {
         return await this.model.findByIdAndDelete(id);
     }
-    updateOneDocument() { }
+    async updateOneDocument(filter, updateObject, options) {
+        return await this.model.findOneAndUpdate(filter, updateObject, options);
+    }
     updateMultipleDocuments() { }
     deleteOneDocument() { }
     deleteMultipleDocuments() { }
