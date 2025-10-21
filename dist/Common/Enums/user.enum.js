@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.OtpTypesEnum = exports.ProviderEnum = exports.GenderEnum = exports.RoleEnum = void 0;
+exports.FriendShipStatusEnum = exports.OtpTypesEnum = exports.ProviderEnum = exports.GenderEnum = exports.RoleEnum = void 0;
 var RoleEnum;
 (function (RoleEnum) {
     RoleEnum["USER"] = "user";
@@ -22,3 +22,9 @@ var OtpTypesEnum;
     OtpTypesEnum["CONFIRMATION"] = "confirmation";
     OtpTypesEnum["RESET_PASSWORD"] = "reset-password";
 })(OtpTypesEnum || (exports.OtpTypesEnum = OtpTypesEnum = {}));
+var FriendShipStatusEnum;
+(function (FriendShipStatusEnum) {
+    FriendShipStatusEnum["PENDING"] = "pending";
+    FriendShipStatusEnum["ACCEPTED"] = "accepted";
+    FriendShipStatusEnum["REJECTED"] = "rejected";
+})(FriendShipStatusEnum || (exports.FriendShipStatusEnum = FriendShipStatusEnum = {}));

@@ -5,7 +5,7 @@ import { UpdateQuery } from "mongoose";
 export abstract class BaseRepository<T> {
 
     constructor(private model:Model<T>){}
-
+    
     async createNewDocument(document:Partial<T>):Promise<T>{
         return await this.model.create(document)
     }
@@ -27,7 +27,7 @@ export abstract class BaseRepository<T> {
         return await this.model.findByIdAndDelete(id)
     }
 
-    async updateOneDocument(filter:FilterQuery<T>, updateObject: UpdateQuery<T>, options?: QueryOptions<T>){
+    async updateOneDocument(filter:FilterQuery<T>, updateObject: UpdateQuery<T>, options: QueryOptions<T> = { new: true } ){
          return await this.model.findOneAndUpdate(filter, updateObject, options)
     }
 

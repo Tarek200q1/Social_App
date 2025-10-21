@@ -17,3 +17,4 @@ Object.defineProperty(exports, "__esModule", { value: true });
 __exportStar(require("./user.repository"), exports);
 __exportStar(require("./base.repository"), exports);
 __exportStar(require("./black-listed-repository"), exports);
+__exportStar(require("./friendShip.repository"), exports);

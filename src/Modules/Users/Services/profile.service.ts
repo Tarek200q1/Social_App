@@ -1,9 +1,10 @@
 import { Request, Response } from "express";
 import { BadRequestException, S3ClientService, SuccessResponse } from "../../../Utils";
-import { IRequest, IUser } from "../../../Common";
-import { UserRepository } from "../../../DB/Repositories";
+import { FriendShipStatusEnum, IFriendShip, IRequest, IUser } from "../../../Common";
+import { FriendShipRepository, UserRepository } from "../../../DB/Repositories";
 import { UserModel } from "../../../DB/Models";
-import mongoose from "mongoose";
+import mongoose, { Types } from "mongoose";
+import { FilterQuery } from "mongoose";
 
 
 
@@ -12,6 +13,7 @@ export class ProfileService {
 
     private s3Client = new S3ClientService()
     private userRepo = new UserRepository(UserModel)
+    private friendShipRepo = new FriendShipRepository()
 
     uploadProfilePicture = async (req: Request, res: Response) => {
         const {file} = req
@@ -68,6 +70,60 @@ export class ProfileService {
     listUsers = async(req: Request, res: Response) => {
         const users = await this.userRepo.findDocuments()
         res.json(SuccessResponse<IUser[]>('Users fetched successfully', 200, users))
+    }
+
+    // uploadCoverPicture
+
+    // send friend ship
+    sendFriendShipRequest = async(req: Request, res: Response) => {
+        const { user: { _id } } = (req as IRequest).loggedInUser
+        const { requestToId } = req.body
+
+        const user = await this.userRepo.findOneDocument({ _id: requestToId as mongoose.Types.ObjectId })
+        if(!user) throw new BadRequestException('User not found')
+
+        await this.friendShipRepo.createNewDocument({requestFromId: _id as Types.ObjectId, requestToId})
+
+        res.json(SuccessResponse<unknown>('Friend ship request sent successfully'))
+    }
+
+    // list requests
+    listRequests = async(req: Request, res: Response) => {
+        const { user: { _id } } = (req as IRequest).loggedInUser
+        const { status } = req.query
+
+        const filters: FilterQuery<IFriendShip> = { status: status ? status : FriendShipStatusEnum.PENDING }
+        if(filters.status == FriendShipStatusEnum.ACCEPTED) filters.$or = [{requestToId: _id}, {requestFromId: _id}]
+        else filters.requestToId = _id
+
+        const requests = await this.friendShipRepo.findDocuments(filters, undefined, {
+            populate: [
+                {
+                    path: 'requestFromId',
+                    select: 'firstName lastName profilePicture'
+                },
+                {
+                    path: 'requestToId',
+                    select: 'firstName lastName profilePicture'
+                },
+            ]
+        })
+
+        res.json(SuccessResponse<IFriendShip[]>('Request fetched successfully', 200, requests))
+    }
+    
+    //respond to request 
+    respondToFriendShipRequests = async(req: Request, res: Response) => {
+        const { user: { _id } } = (req as IRequest).loggedInUser
+        const { friendRequestId, response } = req.body
+
+        const friendRequest = await this.friendShipRepo.findOneDocument({_id: friendRequestId, requestToId: _id, status: FriendShipStatusEnum.PENDING})
+        if(!friendRequest) throw new BadRequestException('Friend request not found')
+
+        friendRequest.status = response
+        await friendRequest.save()
+
+        res.json(SuccessResponse('Requests fetched successfully', 200, friendRequest))
     }
 }
 
