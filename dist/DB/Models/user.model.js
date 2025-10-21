@@ -64,6 +64,7 @@ const userSchema = new mongoose_1.default.Schema({
         default: []
     }
 });
+/** Apply Document hook to password and encrypt phone number before saving a document */
 userSchema.pre('save', function () {
     if (this.isModified('password')) {
         // hsh password

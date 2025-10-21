@@ -14,9 +14,14 @@ enum ProviderEnum {
     LOCAL = 'local'
 }
 
-
 enum OtpTypesEnum {
     CONFIRMATION = 'confirmation',
     RESET_PASSWORD = 'reset-password'
 }
-export {RoleEnum , GenderEnum , ProviderEnum , OtpTypesEnum}
+
+enum FriendShipStatusEnum {
+    PENDING = 'pending',
+    ACCEPTED = 'accepted',
+    REJECTED = 'rejected'
+}
+export {RoleEnum , GenderEnum , ProviderEnum , OtpTypesEnum, FriendShipStatusEnum}

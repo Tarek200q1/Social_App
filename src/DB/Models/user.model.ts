@@ -62,6 +62,7 @@ const userSchema = new mongoose.Schema<IUser>({
 
 })
 
+/** Apply Document hook to password and encrypt phone number before saving a document */
 userSchema.pre('save', function(){
     if(this.isModified('password')){
         

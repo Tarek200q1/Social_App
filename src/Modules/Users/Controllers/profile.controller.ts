@@ -15,12 +15,21 @@ profilecontroller.get('/get-profile', authentication, profileService.getProfileD
 // Upload profile picture
 profilecontroller.post('/profile-picture', authentication, Multer().single('profilePicture'), profileService.uploadProfilePicture)
 
+// renew signed url
+profilecontroller.post('/renew-signed-url', authentication, profileService.reNewSignedUrl)
+
 // Upload cover pictures
 
 // List all user
 profilecontroller.get('/list-users', profileService.listUsers)
 
-// renew signed url
-profilecontroller.post('/renew-signed-url', authentication, profileService.reNewSignedUrl)
+// send friend request
+profilecontroller.post('/send-friend-request', authentication, profileService.sendFriendShipRequest)
+
+// list friend requests
+profilecontroller.get('/list-friend-requests', authentication, profileService.listRequests)
+
+// respond to friend request
+profilecontroller.patch('/respond-to-friend-request', authentication, profileService.respondToFriendShipRequests)
 
 export {profilecontroller}

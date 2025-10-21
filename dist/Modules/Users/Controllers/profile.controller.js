@@ -17,8 +17,14 @@ profilecontroller.delete('/delete-account', Middleware_1.authentication, profile
 profilecontroller.get('/get-profile', Middleware_1.authentication, profile_service_1.default.getProfileData);
 // Upload profile picture
 profilecontroller.post('/profile-picture', Middleware_1.authentication, (0, Middleware_1.Multer)().single('profilePicture'), profile_service_1.default.uploadProfilePicture);
+// renew signed url
+profilecontroller.post('/renew-signed-url', Middleware_1.authentication, profile_service_1.default.reNewSignedUrl);
 // Upload cover pictures
 // List all user
 profilecontroller.get('/list-users', profile_service_1.default.listUsers);
-// renew signed url
-profilecontroller.post('/renew-signed-url', Middleware_1.authentication, profile_service_1.default.reNewSignedUrl);
+// send friend request
+profilecontroller.post('/send-friend-request', Middleware_1.authentication, profile_service_1.default.sendFriendShipRequest);
+// list friend requests
+profilecontroller.get('/list-friend-requests', Middleware_1.authentication, profile_service_1.default.listRequests);
+// respond to friend request
+profilecontroller.patch('/respond-to-friend-request', Middleware_1.authentication, profile_service_1.default.respondToFriendShipRequests);
