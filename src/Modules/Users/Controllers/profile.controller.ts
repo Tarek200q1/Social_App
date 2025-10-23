@@ -32,4 +32,7 @@ profilecontroller.get('/list-friend-requests', authentication, profileService.li
 // respond to friend request
 profilecontroller.patch('/respond-to-friend-request', authentication, profileService.respondToFriendShipRequests)
 
+// create group
+profilecontroller.post('/create-group', authentication, profileService.createGroup)
+
 export {profilecontroller}

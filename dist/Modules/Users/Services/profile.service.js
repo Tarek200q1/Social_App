@@ -9,6 +9,8 @@ class ProfileService {
     s3Client = new Utils_1.S3ClientService();
     userRepo = new Repositories_1.UserRepository(Models_1.UserModel);
     friendShipRepo = new Repositories_1.FriendShipRepository();
+    conversationRepo = new Repositories_1.ConversationRepository();
+    // upload profile picture
     uploadProfilePicture = async (req, res) => {
         const { file } = req;
         const { user } = req.loggedInUser;
@@ -27,6 +29,7 @@ class ProfileService {
         const url = await this.s3Client.getFileWithSignedUrl(key);
         res.json((0, Utils_1.SuccessResponse)('Signed url renewed successfully', 200, { key, url }));
     };
+    // delete account
     deleteAccount = async (req, res) => {
         const { user } = req.loggedInUser;
         const deletedDocument = await this.userRepo.deleteByIdDocument(user._id);
@@ -36,6 +39,7 @@ class ProfileService {
         const deletedResponse = await this.s3Client.DeleteFileFromS3(deletedDocument?.profilePicture);
         res.json((0, Utils_1.SuccessResponse)('Account deleted successfully', 200, deletedResponse));
     };
+    // update profile
     updateProfile = async (req, res) => {
         const { firstName, lastName, email, password, gender, phoneNumber, DOB } = req.body;
         await this.userRepo.updateOneDocument({ _id: req.loggedInUser.user._id }, { $set: { firstName, lastName, email, password, gender, phoneNumber, DOB } }, { new: true });
@@ -48,6 +52,7 @@ class ProfileService {
             throw new Utils_1.BadRequestException('User not found');
         res.json((0, Utils_1.SuccessResponse)('Profile data fetched successfully', 200, user));
     };
+    // list all user
     listUsers = async (req, res) => {
         const users = await this.userRepo.findDocuments();
         res.json((0, Utils_1.SuccessResponse)('Users fetched successfully', 200, users));
@@ -84,7 +89,8 @@ class ProfileService {
                 },
             ]
         });
-        res.json((0, Utils_1.SuccessResponse)('Request fetched successfully', 200, requests));
+        const group = await this.conversationRepo.findDocuments({ type: 'group', members: { $in: _id } });
+        res.json((0, Utils_1.SuccessResponse)('Request fetched successfully', 200, { requests, group }));
     };
     //respond to request 
     respondToFriendShipRequests = async (req, res) => {
@@ -97,6 +103,29 @@ class ProfileService {
         await friendRequest.save();
         res.json((0, Utils_1.SuccessResponse)('Requests fetched successfully', 200, friendRequest));
     };
+    // create group
+    createGroup = async (req, res) => {
+        const { user: { _id } } = req.loggedInUser;
+        const { name, memberIds } = req.body;
+        const members = await this.userRepo.findDocuments({ _id: { $in: memberIds } });
+        if (members.length !== memberIds.length)
+            throw new Utils_1.BadRequestException('Members not found');
+        const friendShip = await this.friendShipRepo.findDocuments({
+            $or: [
+                { requestFromId: _id, requestToId: { $in: memberIds } },
+                { requestFromId: { $in: memberIds }, requestToId: _id }
+            ],
+            status: Common_1.FriendShipStatusEnum.ACCEPTED
+        });
+        if (friendShip.length !== memberIds.length)
+            throw new Utils_1.BadRequestException('Members not found');
+        const group = await this.conversationRepo.createNewDocument({
+            type: 'group',
+            name,
+            members: [_id, ...memberIds]
+        });
+        res.json((0, Utils_1.SuccessResponse)('Group created successfully', 200, group));
+    };
 }
 exports.ProfileService = ProfileService;
-exports.default = new ProfileService();
+exports.default = new ProfileService;

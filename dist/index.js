@@ -41,7 +41,10 @@ const express_1 = __importDefault(require("express"));
 const controllers = __importStar(require("./Modules/controllers.index"));
 const db_connection_1 = require("./DB/db.connection");
 const Utils_1 = require("./Utils");
+const cors_1 = __importDefault(require("cors"));
+const socketIo_gateway_1 = require("./Gateways/socketIo.gateway");
 const app = (0, express_1.default)();
+app.use((0, cors_1.default)());
 app.use(express_1.default.json());
 (0, db_connection_1.dbConnection)();
 app.use('/api/auth', controllers.authController);
@@ -61,6 +64,7 @@ app.use((err, req, res, next) => {
     }
 });
 const port = process.env.PORT || 5000;
-app.listen(port, () => {
+const server = app.listen(port, () => {
     console.log("Server is running on port " + process.env.PORT);
 });
+(0, socketIo_gateway_1.ioIntializer)(server);

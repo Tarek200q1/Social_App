@@ -24,4 +24,9 @@ enum FriendShipStatusEnum {
     ACCEPTED = 'accepted',
     REJECTED = 'rejected'
 }
-export {RoleEnum , GenderEnum , ProviderEnum , OtpTypesEnum, FriendShipStatusEnum}
+
+enum ConversationTypeEnum {
+    DIRECT = 'direct',
+    GROUP = 'group'
+}
+export {RoleEnum , GenderEnum , ProviderEnum , OtpTypesEnum, FriendShipStatusEnum, ConversationTypeEnum}

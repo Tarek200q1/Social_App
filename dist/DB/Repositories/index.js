@@ -18,3 +18,5 @@ __exportStar(require("./user.repository"), exports);
 __exportStar(require("./base.repository"), exports);
 __exportStar(require("./black-listed-repository"), exports);
 __exportStar(require("./friendShip.repository"), exports);
+__exportStar(require("./converstion.repository"), exports);
+__exportStar(require("./message.repository"), exports);
