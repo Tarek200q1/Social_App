@@ -3,8 +3,11 @@ import express, { NextFunction, Request, Response } from 'express'
 import * as controllers from './Modules/controllers.index'
 import { dbConnection } from './DB/db.connection'
 import { FailedResponse, HttpExcption } from './Utils'
+import cors from 'cors'
+import { ioIntializer } from './Gateways/socketIo.gateway'
 const app = express()
 
+app.use(cors())
 app.use(express.json())
 
 dbConnection()
@@ -26,8 +29,9 @@ app.use((err: HttpExcption | Error | null , req: Request , res: Response , next:
     }
 })
 
-
 const port:number | string = process.env.PORT || 5000
-app.listen(port , ()=> {
+const server = app.listen(port , ()=> {
     console.log("Server is running on port " + process.env.PORT);
 })
+
+ioIntializer(server)

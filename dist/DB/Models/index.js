@@ -17,3 +17,5 @@ Object.defineProperty(exports, "__esModule", { value: true });
 __exportStar(require("./user.model"), exports);
 __exportStar(require("./black-listed-tokens.model"), exports);
 __exportStar(require("./friendShip-model"), exports);
+__exportStar(require("./converstions.model"), exports);
+__exportStar(require("./message.model"), exports);

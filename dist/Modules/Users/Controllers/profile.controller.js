@@ -28,3 +28,5 @@ profilecontroller.post('/send-friend-request', Middleware_1.authentication, prof
 profilecontroller.get('/list-friend-requests', Middleware_1.authentication, profile_service_1.default.listRequests);
 // respond to friend request
 profilecontroller.patch('/respond-to-friend-request', Middleware_1.authentication, profile_service_1.default.respondToFriendShipRequests);
+// create group
+profilecontroller.post('/create-group', Middleware_1.authentication, profile_service_1.default.createGroup);

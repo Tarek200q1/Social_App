@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { BadRequestException, S3ClientService, SuccessResponse } from "../../../Utils";
 import { FriendShipStatusEnum, IFriendShip, IRequest, IUser } from "../../../Common";
-import { FriendShipRepository, UserRepository } from "../../../DB/Repositories";
+import { ConversationRepository, FriendShipRepository, UserRepository } from "../../../DB/Repositories";
 import { UserModel } from "../../../DB/Models";
 import mongoose, { Types } from "mongoose";
 import { FilterQuery } from "mongoose";
@@ -14,7 +14,9 @@ export class ProfileService {
     private s3Client = new S3ClientService()
     private userRepo = new UserRepository(UserModel)
     private friendShipRepo = new FriendShipRepository()
+    private conversationRepo = new ConversationRepository()
 
+    // upload profile picture
     uploadProfilePicture = async (req: Request, res: Response) => {
         const {file} = req
         const {user} = (req as IRequest).loggedInUser
@@ -37,6 +39,7 @@ export class ProfileService {
         res.json(SuccessResponse<unknown>('Signed url renewed successfully', 200, { key, url }))
     }
 
+    // delete account
     deleteAccount = async (req: Request, res: Response) => {
         const { user } = (req as IRequest).loggedInUser
         const deletedDocument = await this.userRepo.deleteByIdDocument(user._id as mongoose.Schema.Types.ObjectId)
@@ -48,6 +51,7 @@ export class ProfileService {
         res.json(SuccessResponse<unknown>('Account deleted successfully', 200, deletedResponse))
     }
 
+    // update profile
     updateProfile = async(req: Request, res: Response) => {
         const {firstName, lastName, email, password, gender, phoneNumber, DOB}: IUser = req.body
 
@@ -67,6 +71,7 @@ export class ProfileService {
         res.json(SuccessResponse<IUser>('Profile data fetched successfully', 200, user))
     }
 
+    // list all user
     listUsers = async(req: Request, res: Response) => {
         const users = await this.userRepo.findDocuments()
         res.json(SuccessResponse<IUser[]>('Users fetched successfully', 200, users))
@@ -109,7 +114,9 @@ export class ProfileService {
             ]
         })
 
-        res.json(SuccessResponse<IFriendShip[]>('Request fetched successfully', 200, requests))
+        const group = await this.conversationRepo.findDocuments({ type: 'group', members: { $in: _id } })
+
+        res.json(SuccessResponse('Request fetched successfully', 200,{ requests, group }))
     }
     
     //respond to request 
@@ -125,8 +132,34 @@ export class ProfileService {
 
         res.json(SuccessResponse('Requests fetched successfully', 200, friendRequest))
     }
+
+    // create group
+    createGroup = async (req: Request, res: Response) => {
+        const { user: { _id } } = (req as IRequest).loggedInUser
+        const { name, memberIds } = req.body
+
+        const members = await this.userRepo.findDocuments({ _id: { $in: memberIds } })
+        if(members.length !== memberIds.length) throw new BadRequestException('Members not found')
+
+        const friendShip = await this.friendShipRepo.findDocuments({
+            $or: [
+                { requestFromId: _id, requestToId: { $in: memberIds } },
+                { requestFromId: { $in:memberIds }, requestToId: _id}
+            ],
+            status: FriendShipStatusEnum.ACCEPTED
+        })
+        if(friendShip.length !== memberIds.length) throw new BadRequestException('Members not found')
+        
+        const group = await this.conversationRepo.createNewDocument({
+            type: 'group',
+            name,
+            members: [ _id, ...memberIds ]
+        })
+
+        res.json(SuccessResponse('Group created successfully', 200, group))
+    }
 }
 
 
 
-export default new ProfileService()
+export default new ProfileService
